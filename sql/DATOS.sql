@@ -34,12 +34,6 @@ INSERT INTO clase VALUES (7, 4, 'Zumba Fit',    'Baile y cardio',               
 INSERT INTO clase VALUES (8, 4, 'Zumba Latino', 'Ritmos latinos',                    'MIERCOLES', '19:30', '20:30', 25);
 
 -- MEMBRESIA
--- (mezcla de activas, vencidas y suspendidas)
--- IMPORTANTE: las fechas son relativas a SYSDATE para que las membresias
--- 'ACTIVA' sigan VIGENTES cualquier dia que se ejecute el script. Esto es
--- obligatorio porque el trigger RN7 (trg_inscripcion_membresia_activa) exige
--- fecha_vencimiento >= TRUNC(SYSDATE) para poder insertar las inscripciones.
--- La diferencia (venc - inicio) coincide con la duracion_dias de cada plan.
 INSERT INTO membresia VALUES (1,  1, 1,  TRUNC(SYSDATE),  TRUNC(SYSDATE),  'ACTIVA');
 INSERT INTO membresia VALUES (2,  2, 2,  TRUNC(SYSDATE),  TRUNC(SYSDATE),  'ACTIVA');
 INSERT INTO membresia VALUES (3,  3, 3,  TRUNC(SYSDATE),  TRUNC(SYSDATE), 'ACTIVA');

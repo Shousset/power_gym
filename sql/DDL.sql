@@ -1,35 +1,6 @@
--- ============================================================================
--- POWER GYM - DDL.sql
--- Script de definicion de datos para Oracle 18c
--- Autor: Samuel Benavides Housset
--- ============================================================================
--- Este script reconstruye toda la estructura de la base de datos.
--- Se ejecuta como propietario del esquema (ej: usuario admin POWERGYM).
--- ============================================================================
 
--- Limpieza previa (permite re-ejecutar el script sin errores).
--- Se ignoran errores si las tablas/secuencias no existen aun.
-
-BEGIN
-    FOR t IN (SELECT table_name FROM user_tables
-              WHERE table_name IN ('ASISTENCIA','INSCRIPCION','CLASE','ENTRENADOR',
-                                   'PAGO','MEMBRESIA','PLAN','CLIENTE'))
-    LOOP
-        EXECUTE IMMEDIATE 'DROP TABLE '||t.table_name||' CASCADE CONSTRAINTS';
-    END LOOP;
-
-    FOR s IN (SELECT sequence_name FROM user_sequences
-              WHERE sequence_name LIKE 'SEQ\_%' ESCAPE '\')
-    LOOP
-        EXECUTE IMMEDIATE 'DROP SEQUENCE '||s.sequence_name;
-    END LOOP;
-END;
-/
-
--- ============================================================================
 -- SECUENCIAS (para generar IDs en la aplicacion)
 -- Empiezan en 100 para no chocar con los IDs explicitos de DATOS.sql (1-99)
--- ============================================================================
 
 CREATE SEQUENCE seq_cliente      START WITH 100 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE seq_plan         START WITH 100 INCREMENT BY 1 NOCACHE;
@@ -40,9 +11,7 @@ CREATE SEQUENCE seq_clase        START WITH 100 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE seq_inscripcion  START WITH 100 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE seq_asistencia   START WITH 100 INCREMENT BY 1 NOCACHE;
 
--- ============================================================================
 -- TABLAS
--- ============================================================================
 
 -- 1. CLIENTE -----------------------------------------------------------------
 CREATE TABLE cliente (
@@ -157,9 +126,7 @@ CREATE TABLE asistencia (
     CONSTRAINT chk_asistencia_hora   CHECK (REGEXP_LIKE(hora_entrada, '^[0-2][0-9]:[0-5][0-9]$'))
 );
 
--- ============================================================================
 -- TRIGGERS DE REGLAS DE NEGOCIO
--- ============================================================================
 
 -- RN1: un cliente no puede tener mas de una membresia en estado ACTIVA
 CREATE OR REPLACE TRIGGER trg_unica_membresia_activa
@@ -176,8 +143,7 @@ BEGIN
     AND  id_membresia <> NVL(:NEW.id_membresia, -1);
 
     IF v_cuenta > 0 THEN
-        RAISE_APPLICATION_ERROR(-20001,
-            'RN1: el cliente ya tiene una membresia activa.');
+        RAISE_APPLICATION_ERROR(-20001, 'RN1: el cliente ya tiene una membresia activa.');
     END IF;
 END;
 /
@@ -229,9 +195,7 @@ BEGIN
 END;
 /
 
--- ============================================================================
 -- INDICES (para mejorar el rendimiento de los reportes)
--- ============================================================================
 
 CREATE INDEX idx_membresia_estado     ON membresia(estado);
 CREATE INDEX idx_membresia_venc       ON membresia(fecha_vencimiento);

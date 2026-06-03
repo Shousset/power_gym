@@ -6,8 +6,7 @@ WHERE  id_cliente IN (SELECT id_cliente FROM membresia WHERE estado = 'ACTIVA');
 -- 2. Pagos realizados en mayo de 2026 mayores a 100.000.
 SELECT id_pago, id_membresia, fecha_pago, monto, metodo_pago
 FROM   pago
-WHERE  fecha_pago BETWEEN DATE '2026-05-01' AND DATE '2026-05-31'
-  AND  monto > 100000;
+WHERE  fecha_pago BETWEEN DATE '2026-05-01' AND DATE '2026-05-31' AND  monto > 100000;
 
 -- 3. Clases con cupo maximo mayor o igual a 20.
 SELECT id_clase, nombre, dia_semana, hora_inicio, cupo_maximo
@@ -62,16 +61,11 @@ ORDER  BY cl.dia_semana, cl.hora_inicio;
 -- (catalogo de combinaciones posibles para el formulario de la app).
 SELECT p.nombre AS plan, p.precio, m.metodo
 FROM   plan p
-CROSS  JOIN (SELECT 'EFECTIVO' AS metodo FROM dual
-             UNION ALL SELECT 'TARJETA'       FROM dual
-             UNION ALL SELECT 'TRANSFERENCIA' FROM dual) m
+CROSS  JOIN (SELECT 'EFECTIVO' AS metodo FROM dual UNION ALL SELECT 'TARJETA'       FROM dual UNION ALL SELECT 'TRANSFERENCIA' FROM dual) m
 ORDER  BY p.id_plan, m.metodo;
 
 -- 13. INNER JOIN multi-tabla: inscripciones activas con cliente, clase y entrenador.
-SELECT c.nombre || ' ' || c.apellido AS cliente,
-       cl.nombre AS clase,
-       e.nombre  || ' ' || e.apellido AS entrenador,
-       i.fecha_inscripcion
+SELECT c.nombre || ' ' || c.apellido AS cliente, cl.nombre AS clase, e.nombre  || ' ' || e.apellido AS entrenador, i.fecha_inscripcion
 FROM   inscripcion i
 INNER  JOIN cliente    c  ON i.id_cliente    = c.id_cliente
 INNER  JOIN clase      cl ON i.id_clase      = cl.id_clase
@@ -79,9 +73,7 @@ INNER  JOIN entrenador e  ON cl.id_entrenador = e.id_entrenador
 WHERE  i.estado = 'ACTIVA';
 
 -- 14. LEFT JOIN: asistencias con la clase a la que asistio (si la hubo).
-SELECT a.id_asistencia, c.nombre || ' ' || c.apellido AS cliente,
-       NVL(cl.nombre, '(entrada libre)') AS clase,
-       a.fecha_asistencia, a.hora_entrada
+SELECT a.id_asistencia, c.nombre || ' ' || c.apellido AS cliente, NVL(cl.nombre, '(entrada libre)') AS clase, a.fecha_asistencia, a.hora_entrada
 FROM   asistencia a
 INNER  JOIN cliente c  ON a.id_cliente = c.id_cliente
 LEFT   JOIN clase   cl ON a.id_clase   = cl.id_clase
