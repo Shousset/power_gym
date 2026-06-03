@@ -12,7 +12,6 @@ Pre-requisitos:
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-
 import oracledb
 
 from config import PERFILES
@@ -27,8 +26,14 @@ class PowerGymApp:
         self.root = tk.Tk()
         self.root.title("Power Gym")
         self.root.geometry("950x600")
+        # Cualquier excepcion no controlada dentro de un callback de Tk se
+        # mostrara en un dialogo en lugar de propagarse y tumbar el mainloop.
+        self.root.report_callback_exception = self._reportar_error_callback
         self._mostrar_login()
         self.root.mainloop()
+
+    def _reportar_error_callback(self, exc, val, tb):
+        messagebox.showerror("Error inesperado", f"{exc.__name__}: {val}")
 
     # ------------------------------------------------------------------ Login
     def _mostrar_login(self):
@@ -80,7 +85,7 @@ class PowerGymApp:
             self.conn = conectar(creds["usuario_bd"], password)
             self.perfil = perfil
             self._mostrar_principal()
-        except oracledb.Error as e:
+        except Exception as e:
             messagebox.showerror("Error de login", f"No se pudo conectar a Oracle:\n\n{e}")
 
     # -------------------------------------------------------------- Principal

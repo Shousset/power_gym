@@ -129,8 +129,7 @@ CREATE TABLE clase (
     CONSTRAINT fk_clase_entrenador FOREIGN KEY (id_entrenador) REFERENCES entrenador(id_entrenador),
     CONSTRAINT chk_clase_dia   CHECK (dia_semana IN ('LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO')),
     CONSTRAINT chk_clase_cupo  CHECK (cupo_maximo > 0),
-    CONSTRAINT chk_clase_hora  CHECK (REGEXP_LIKE(hora_inicio, '^[0-2][0-9]:[0-5][0-9]$') AND
-                                      REGEXP_LIKE(hora_fin,    '^[0-2][0-9]:[0-5][0-9]$'))
+    CONSTRAINT chk_clase_hora  CHECK (REGEXP_LIKE(hora_inicio, '^[0-2][0-9]:[0-5][0-9]$') AND REGEXP_LIKE(hora_fin,    '^[0-2][0-9]:[0-5][0-9]$'))
 );
 
 -- 7. INSCRIPCION ------------------------------------------------------------
@@ -173,8 +172,8 @@ BEGIN
     SELECT COUNT(*) INTO v_cuenta
     FROM   membresia
     WHERE  id_cliente = :NEW.id_cliente
-      AND  estado     = 'ACTIVA'
-      AND  id_membresia <> NVL(:NEW.id_membresia, -1);
+    AND  estado     = 'ACTIVA'
+    AND  id_membresia <> NVL(:NEW.id_membresia, -1);
 
     IF v_cuenta > 0 THEN
         RAISE_APPLICATION_ERROR(-20001,
@@ -241,7 +240,3 @@ CREATE INDEX idx_asistencia_fecha     ON asistencia(fecha_asistencia);
 CREATE INDEX idx_inscripcion_clase    ON inscripcion(id_clase);
 
 COMMIT;
-
--- ============================================================================
--- Fin DDL.sql
--- ============================================================================

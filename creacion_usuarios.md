@@ -13,11 +13,11 @@ El sistema define **tres niveles de acceso** mediante **roles** de Oracle. Un ro
 
 | Nivel | Rol | Usuario asociado | Responsabilidad |
 |-------|-----|------------------|-----------------|
-| 1 | `rol_admin_powergym` | `powergym` (propietario del esquema) | Crear tablas, secuencias, triggers, vistas, otorgar permisos, hacer respaldos. |
+| 1 | `c##rol_admin_powergym` | `c##powergym` (propietario del esquema) | Crear tablas, secuencias, triggers, vistas, otorgar permisos, hacer respaldos. |
 | 2 | `rol_recepcion` | `user_recepcion` | Gestión de clientes, membresías, pagos, inscripciones y asistencias. |
 | 3 | `rol_entrenador` | `user_entrenador` | Consulta de inscritos y registro de asistencia a sus clases. |
 
-> El usuario `powergym` funciona como **propietario del esquema** y administrador funcional. No se usa el `SYS` ni el `SYSTEM` para operar el sistema diariamente; esos quedan reservados para el DBA de la instancia.
+> El usuario `c##powergym` funciona como **propietario del esquema** y administrador funcional. No se usa el `SYS` ni el `SYSTEM` para operar el sistema diariamente; esos quedan reservados para el DBA de la instancia.
 
 ---
 
@@ -33,7 +33,7 @@ El sistema define **tres niveles de acceso** mediante **roles** de Oracle. Un ro
 
 ---
 
-## 3. Paso 1 — Crear el esquema administrador (`powergym`)
+## 3. Paso 1 — Crear el esquema administrador (`c##powergym`)
 
 Este usuario será el **dueño de todas las tablas, triggers y secuencias**. Se conecta a él para ejecutar `DDL.sql` y `DATOS.sql`.
 
@@ -42,32 +42,32 @@ Este usuario será el **dueño de todas las tablas, triggers y secuencias**. Se 
 CONNECT system/<clave_system>@XEPDB1;
 
 -- Limpieza previa (si ya existe)
-DROP USER powergym CASCADE;
+DROP USER c##powergym CASCADE;
 
 -- Crear usuario administrador del esquema
-CREATE USER powergym IDENTIFIED BY "Admin_2026!"
+CREATE USER c##powergym IDENTIFIED BY "Admin_2026!"
     DEFAULT TABLESPACE   users
     TEMPORARY TABLESPACE temp
     QUOTA UNLIMITED ON   users;
 
 -- Crear el rol de administrador del sistema Power Gym
-CREATE ROLE rol_admin_powergym;
+CREATE ROLE c##rol_admin_powergym;
 
 -- Privilegios de sistema para el rol administrador
-GRANT CREATE SESSION       TO rol_admin_powergym;
-GRANT CREATE TABLE         TO rol_admin_powergym;
-GRANT CREATE SEQUENCE      TO rol_admin_powergym;
-GRANT CREATE VIEW          TO rol_admin_powergym;
-GRANT CREATE TRIGGER       TO rol_admin_powergym;
-GRANT CREATE PROCEDURE     TO rol_admin_powergym;
-GRANT CREATE SYNONYM       TO rol_admin_powergym;
-GRANT CREATE PUBLIC SYNONYM TO rol_admin_powergym;
+GRANT CREATE SESSION       TO c##rol_admin_powergym;
+GRANT CREATE TABLE         TO c##rol_admin_powergym;
+GRANT CREATE SEQUENCE      TO c##rol_admin_powergym;
+GRANT CREATE VIEW          TO c##rol_admin_powergym;
+GRANT CREATE TRIGGER       TO c##rol_admin_powergym;
+GRANT CREATE PROCEDURE     TO c##rol_admin_powergym;
+GRANT CREATE SYNONYM       TO c##rol_admin_powergym;
+GRANT CREATE PUBLIC SYNONYM TO c##rol_admin_powergym;
 
 -- Asignar el rol al usuario administrador
-GRANT rol_admin_powergym TO powergym;
+GRANT c##rol_admin_powergym TO c##powergym;
 
--- Permitir que powergym otorgue privilegios sobre SUS objetos
-GRANT GRANT ANY OBJECT PRIVILEGE TO powergym;
+-- Permitir que c##powergym otorgue privilegios sobre SUS objetos
+GRANT GRANT ANY OBJECT PRIVILEGE TO c##powergym;
 ```
 
 Verificación:
@@ -84,7 +84,7 @@ SELECT granted_role             FROM dba_role_privs WHERE grantee = 'POWERGYM';
 Conectarse como el nuevo administrador y ejecutar los scripts del proyecto.
 
 ```sql
-CONNECT powergym/Admin_2026!@XEPDB1;
+CONNECT c##powergym/Admin_2026!@XEPDB1;
 
 @C:\...\proyect_power_gym\sql\DDL.sql
 @C:\...\proyect_power_gym\sql\DATOS.sql
@@ -115,23 +115,23 @@ CREATE ROLE rol_recepcion;
 GRANT CREATE SESSION TO rol_recepcion;
 
 -- Permisos sobre objetos del esquema POWERGYM
-GRANT SELECT, INSERT, UPDATE, DELETE ON powergym.cliente     TO rol_recepcion;
-GRANT SELECT, INSERT, UPDATE         ON powergym.membresia   TO rol_recepcion;
-GRANT SELECT, INSERT                 ON powergym.pago        TO rol_recepcion;
-GRANT SELECT, INSERT, UPDATE         ON powergym.inscripcion TO rol_recepcion;
-GRANT SELECT, INSERT                 ON powergym.asistencia  TO rol_recepcion;
-GRANT SELECT                         ON powergym.plan        TO rol_recepcion;
-GRANT SELECT                         ON powergym.clase       TO rol_recepcion;
+GRANT SELECT, INSERT, UPDATE, DELETE ON c##powergym.cliente     TO rol_recepcion;
+GRANT SELECT, INSERT, UPDATE         ON c##powergym.membresia   TO rol_recepcion;
+GRANT SELECT, INSERT                 ON c##powergym.pago        TO rol_recepcion;
+GRANT SELECT, INSERT, UPDATE         ON c##powergym.inscripcion TO rol_recepcion;
+GRANT SELECT, INSERT                 ON c##powergym.asistencia  TO rol_recepcion;
+GRANT SELECT                         ON c##powergym.plan        TO rol_recepcion;
+GRANT SELECT                         ON c##powergym.clase       TO rol_recepcion;
 
 -- Vista publica del entrenador (sin salario) — creada en usuarios.sql
-GRANT SELECT ON powergym.v_entrenador_publico TO rol_recepcion;
+GRANT SELECT ON c##powergym.v_entrenador_publico TO rol_recepcion;
 
 -- Secuencias necesarias para insertar
-GRANT SELECT ON powergym.seq_cliente     TO rol_recepcion;
-GRANT SELECT ON powergym.seq_membresia   TO rol_recepcion;
-GRANT SELECT ON powergym.seq_pago        TO rol_recepcion;
-GRANT SELECT ON powergym.seq_inscripcion TO rol_recepcion;
-GRANT SELECT ON powergym.seq_asistencia  TO rol_recepcion;
+GRANT SELECT ON c##powergym.seq_cliente     TO rol_recepcion;
+GRANT SELECT ON c##powergym.seq_membresia   TO rol_recepcion;
+GRANT SELECT ON c##powergym.seq_pago        TO rol_recepcion;
+GRANT SELECT ON c##powergym.seq_inscripcion TO rol_recepcion;
+GRANT SELECT ON c##powergym.seq_asistencia  TO rol_recepcion;
 ```
 
 **Restricciones explícitas** (lo que el rol NO puede hacer):
@@ -156,20 +156,20 @@ CREATE ROLE rol_entrenador;
 GRANT CREATE SESSION TO rol_entrenador;
 
 -- Solo lectura sobre datos básicos del cliente
-GRANT SELECT ON powergym.cliente     TO rol_entrenador;
+GRANT SELECT ON c##powergym.cliente     TO rol_entrenador;
 
 -- Consultar el cronograma y los inscritos
-GRANT SELECT ON powergym.clase       TO rol_entrenador;
-GRANT SELECT ON powergym.inscripcion TO rol_entrenador;
+GRANT SELECT ON c##powergym.clase       TO rol_entrenador;
+GRANT SELECT ON c##powergym.inscripcion TO rol_entrenador;
 
 -- Registrar asistencia (no editar ni borrar)
-GRANT SELECT, INSERT ON powergym.asistencia TO rol_entrenador;
+GRANT SELECT, INSERT ON c##powergym.asistencia TO rol_entrenador;
 
 -- Información publica de entrenadores (sin salario)
-GRANT SELECT ON powergym.v_entrenador_publico TO rol_entrenador;
+GRANT SELECT ON c##powergym.v_entrenador_publico TO rol_entrenador;
 
 -- Secuencia para registrar asistencias
-GRANT SELECT ON powergym.seq_asistencia TO rol_entrenador;
+GRANT SELECT ON c##powergym.seq_asistencia TO rol_entrenador;
 ```
 
 **Restricciones explícitas:**
@@ -314,7 +314,7 @@ ROLLBACK;
 
 ## 10. Tabla resumen de privilegios
 
-| Tabla / Objeto | `powergym` (admin) | `user_recepcion` | `user_entrenador` |
+| Tabla / Objeto | `c##powergym` (admin) | `user_recepcion` | `user_entrenador` |
 |----------------|:--:|:--:|:--:|
 | `cliente`      | ALL | S/I/U/D | S |
 | `plan`         | ALL | S       | — |
@@ -340,11 +340,11 @@ CONNECT system/<clave_system>@XEPDB1;
 
 DROP USER user_recepcion  CASCADE;
 DROP USER user_entrenador CASCADE;
-DROP USER powergym        CASCADE;
+DROP USER c##powergym        CASCADE;
 
 DROP ROLE rol_recepcion;
 DROP ROLE rol_entrenador;
-DROP ROLE rol_admin_powergym;
+DROP ROLE c##rol_admin_powergym;
 
 DROP PROFILE perfil_powergym CASCADE;
 ```
