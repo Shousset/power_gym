@@ -1,16 +1,3 @@
-
--- SECUENCIAS (para generar IDs en la aplicacion)
--- Empiezan en 100 para no chocar con los IDs explicitos de DATOS.sql (1-99)
-
-CREATE SEQUENCE seq_cliente      START WITH 100 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_plan         START WITH 100 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_membresia    START WITH 100 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_pago         START WITH 100 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_entrenador   START WITH 100 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_clase        START WITH 100 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_inscripcion  START WITH 100 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_asistencia   START WITH 100 INCREMENT BY 1 NOCACHE;
-
 -- TABLAS
 
 -- 1. CLIENTE -----------------------------------------------------------------
@@ -98,7 +85,7 @@ CREATE TABLE clase (
     CONSTRAINT fk_clase_entrenador FOREIGN KEY (id_entrenador) REFERENCES entrenador(id_entrenador),
     CONSTRAINT chk_clase_dia   CHECK (dia_semana IN ('LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO')),
     CONSTRAINT chk_clase_cupo  CHECK (cupo_maximo > 0),
-    CONSTRAINT chk_clase_hora  CHECK (REGEXP_LIKE(hora_inicio, '^[0-2][0-9]:[0-5][0-9]$') AND REGEXP_LIKE(hora_fin,    '^[0-2][0-9]:[0-5][0-9]$'))
+    CONSTRAINT chk_clase_hora  CHECK (REGEXP_LIKE(hora_inicio, '^[0-2][0-9]:[0-5][0-9]$')   AND REGEXP_LIKE(hora_fin,    '^[0-2][0-9]:[0-5][0-9]$'))
 );
 
 -- 7. INSCRIPCION ------------------------------------------------------------
@@ -139,8 +126,8 @@ BEGIN
     SELECT COUNT(*) INTO v_cuenta
     FROM   membresia
     WHERE  id_cliente = :NEW.id_cliente
-    AND  estado     = 'ACTIVA'
-    AND  id_membresia <> NVL(:NEW.id_membresia, -1);
+        AND  estado     = 'ACTIVA'
+        AND  id_membresia <> NVL(:NEW.id_membresia, -1);
 
     IF v_cuenta > 0 THEN
         RAISE_APPLICATION_ERROR(-20001, 'RN1: el cliente ya tiene una membresia activa.');
@@ -164,15 +151,15 @@ BEGIN
     SELECT COUNT(*) INTO v_inscritos
     FROM   inscripcion
     WHERE  id_clase = :NEW.id_clase
-      AND  estado   = 'ACTIVA'
-      AND  id_inscripcion <> NVL(:NEW.id_inscripcion, -1);
+        AND  estado   = 'ACTIVA'
+        AND  id_inscripcion <> NVL(:NEW.id_inscripcion, -1);
 
     IF v_inscritos >= v_cupo THEN
         RAISE_APPLICATION_ERROR(-20002,
             'RN2: la clase ya alcanzo su cupo maximo.');
     END IF;
 END;
-/
+
 
 -- RN7: solo se permite inscribir a clientes con membresia ACTIVA vigente
 CREATE OR REPLACE TRIGGER trg_inscripcion_membresia_activa
@@ -185,15 +172,14 @@ BEGIN
     SELECT COUNT(*) INTO v_activa
     FROM   membresia
     WHERE  id_cliente        = :NEW.id_cliente
-      AND  estado            = 'ACTIVA'
-      AND  fecha_vencimiento >= TRUNC(SYSDATE);
+        AND  estado            = 'ACTIVA'
+        AND  fecha_vencimiento >= TRUNC(SYSDATE);
 
     IF v_activa = 0 THEN
-        RAISE_APPLICATION_ERROR(-20003,
-            'RN7: el cliente no tiene una membresia activa vigente.');
+        RAISE_APPLICATION_ERROR(-20003,'RN7: el cliente no tiene una membresia activa vigente.');
     END IF;
 END;
-/
+
 
 -- INDICES (para mejorar el rendimiento de los reportes)
 
